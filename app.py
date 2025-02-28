@@ -206,8 +206,10 @@ def edit_todo_action(id):
 @app.route('/admin')
 @login_required(Admin)
 def admin_page():
-  todos = Todo.query.all()
-  return render_template('admin.html', todos=todos)
+  page = request.args.get('page', 1, type=int)
+  q = request.args.get('q', default='', type=str)
+  todos = current_user.search_todos(q, page)
+  return render_template('admin.html', todos=todos, page=page, q=q)
 
 
 if __name__ == "__main__":
