@@ -150,12 +150,8 @@ def login_action():
   response = None
   if token:
     flash('Logged in successfully.')  # send message to next page
-    # Get the user to check user type
-    user = User.query.filter_by(username=data['username']).first()
-    if user.type == "regular user":
-      response = redirect(url_for('todos_page'))
-    else:
-      response = redirect(url_for('admin_page'))
+    response = redirect(
+        url_for('todos_page'))  # redirect to main page if login successful
     set_access_cookies(response, token)
   else:
     flash('Invalid username or password')  # send message to next page
@@ -208,6 +204,25 @@ def edit_todo_action(id):
 def admin_page():
   todos = Todo.query.all()
   return render_template('admin.html', todos=todos)
+
+@app.route('/login', methods=['POST'])
+def login_action():
+  data = request.form
+  token = login_user(data['username'], data['password'])
+  print(token)
+  response = None
+  user = User.query.filter_by(username=data['username']).first()
+  if token:
+    flash('Logged in successfully.')  # send message to next page
+    if user.type == "regular user":
+      response = redirect(url_for('todos_page'))
+    else :
+      response = redirect(url_for('admin_page'))  # redirect to main page if login successful
+    set_access_cookies(response, token)
+  else:
+    flash('Invalid username or password')  # send message to next page
+    response = redirect(url_for('login_page'))
+   return response
 
 
 if __name__ == "__main__":
