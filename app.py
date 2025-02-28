@@ -212,5 +212,22 @@ def admin_page():
   return render_template('admin.html', todos=todos, page=page, q=q)
 
 
+# Create admin user "pam" if it doesn't exist
+@app.before_first_request
+def create_admin_user():
+  admin = Admin.query.filter_by(username="pam").first()
+  if not admin:
+    try:
+      # Create an admin user with username "pam" and password "pampass"
+      admin = Admin(staff_id="A1234", username="pam", email="pam@example.com", password="pampass")
+      db.session.add(admin)
+      db.session.commit()
+      print("Admin user 'pam' created successfully.")
+    except Exception as e:
+      db.session.rollback()
+      print(f"Error creating admin user: {e}")
+
 if __name__ == "__main__":
+  with app.app_context():
+    db.create_all()  # Make sure tables are created
   app.run(host='0.0.0.0', port=81)

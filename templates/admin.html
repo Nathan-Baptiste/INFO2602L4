@@ -1,104 +1,68 @@
 {% extends "layout.html" %}
-{% block title %}Admin View{% endblock %}
-{% block page %}Admin View{% endblock %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block page %}Admin Dashboard{% endblock %}
 
 {% block link%}
 <ul id="nav-mobile" class="right">
-  <li><a href="/todo-stats">Stats</a></li>
   <li><a href="/logout">Logout</a></li>
 </ul>
 {% endblock %}
 
-{% block styles %}
-
-{% endblock %}
-
 {% block content %}
-<main class="container" style="padding-top:100px">
+<main class="container" style="padding-top: 75px">
+  <h3>Admin Dashboard</h3>
+  <p>Welcome, {{ current_user.username }}!</p>
 
+  <div class="card">
+    <div class="card-content">
+      <span class="card-title">All Todos</span>
+      <table class="striped">
+        <thead>
+          <tr>
+              <th>ID</th>
+              <th>User</th>
+              <th>Text</th>
+              <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for todo in todos %}
+          <tr>
+            <td>{{ todo.id }}</td>
+            <td>{{ todo.user.username }}</td>
+            <td>{{ todo.text }}</td>
+            <td>{% if todo.done %}Completed{% else %}Pending{% endif %}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
 
-  <form method="GET" action="/admin">
-    <div class="row">
-      <div class="col m10 input-field">
-        <input class="blue-text" name="q" type="search" placeholder="Search">
+      {% if todos.has_prev or todos.has_next %}
+      <div class="pagination" style="margin-top: 20px;">
+        {% if todos.has_prev %}
+        <a href="{{ url_for('admin_page', page=todos.prev_num, q=q) }}" class="btn-small">&laquo; Previous</a>
+        {% endif %}
+
+        <span class="btn-small disabled">Page {{ todos.page }} of {{ todos.pages }}</span>
+
+        {% if todos.has_next %}
+        <a href="{{ url_for('admin_page', page=todos.next_num, q=q) }}" class="btn-small">Next &raquo;</a>
+        {% endif %}
       </div>
-      <div class="col m2 input-field">
-        <div class="row">
-          <button type="submit" class="btn blue">
-            <i class="material-icons">search</i>
-          </button>
-          <button type="button" onclick="q.value=''; this.form.submit()" class="btn blue">
-            <i class="material-icons">close</i>
-          </button>
-        </div>
-
-      </div>
+      {% endif %}
     </div>
+  </div>
 
-
-  </form>
-
-  <table>
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>User</th>
-        <th>Text</th>
-        <th>Done</th>
-      </tr>
-    </thead>
-
-    <tbody>
-      {% for todo in todos %}
-      <tr>
-        <td>{{todo.id}}</td>
-        <td>{{todo.user.username}}</td>
-        <td>{{todo.text}}</td>
-        <td>{{todo.done}}</td>
-      </tr>
-      {% endfor %}
-
-    </tbody>
-  </table>
-
-   <!--- Table end -->    
-  <div class="row">
-
-            <ul class="pagination col s12 center">
-              {% if todos.prev_num %}
-              <li class="waves-effect">
-                  <a href="{{ url_for('admin_page', page=todos.prev_num) }}"><i class="material-icons">chevron_left</i></a>
-              </li>
-              {% else %}
-              <li class="disabled">
-                  <a href="#!"><i class="material-icons">chevron_left</i></a>
-              </li>
-              {% endif %}
-
-              {% for page_num in todos.iter_pages() %}
-                  {% if page_num %}
-                      {% if todos.page == page_num %}
-                      <li class="active blue"><a href="#!">{{ page_num }}</a></li>
-                      {% else %}
-                      <li class="waves-effect"><a href="{{ url_for('admin_page', page=page_num) }}">{{ page_num }}</a></li>
-                      {% endif %}
-                  {% else %}
-                      <li class="disabled"><a href="#!">...</a></li>
-                  {% endif %}
-              {% endfor %}
-
-              {% if todos.has_next %}
-              <li class="waves-effect">
-                  <a href="{{ url_for('admin_page', page=todos.next_num) }}"><i class="material-icons">chevron_right</i></a>
-              </li>
-              {% else %}
-              <li class="disabled">
-                  <a href="#!"><i class="material-icons">chevron_right</i></a>
-              </li>
-              {% endif %}
-          </ul>
-
-          </div>
-
+  <div class="card" style="margin-top: 20px;">
+    <div class="card-content">
+      <span class="card-title">Search Todos</span>
+      <form action="{{ url_for('admin_page') }}" method="GET">
+        <div class="input-field">
+          <input type="text" name="q" value="{{ q }}" placeholder="Search by username or todo text">
+        </div>
+        <button type="submit" class="btn">Search</button>
+      </form>
+    </div>
+  </div>
 </main>
 {% endblock %}
